@@ -8,7 +8,7 @@ FILES = main.cpp Renderer.cpp VertexBuffer.cpp IndexBuffer.cpp VertexArray.cpp S
 INCLUDE = -I.
 
 # Tests
-FILES += tests/TestClearColor.cpp
+FILES += tests/TestClearColor.cpp tests/Test.cpp
 INCLUDE += -Itests
 
 # STB 

@@ -1,6 +1,8 @@
 #include "IndexBuffer.h"
 #include "Renderer.h"
 #include "Shader.h"
+#include "Test.h"
+#include "TestClearColor.h"
 #include "Texture.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
@@ -48,6 +50,11 @@ int main(void) {
 
     std::cout << glGetString(GL_VERSION) << std::endl;
 
+    GLCall(glEnable(GL_BLEND));
+    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+    Renderer renderer;
+
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -59,91 +66,43 @@ int main(void) {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init();
 
-    float positions[] = {
-        -0.5f, -0.5f, 0.0f, 0.0f, // 0
-        0.5f, -0.5f, 1.0f, 0.0f, // 1
-        0.5f, 0.5f, 1.0f, 1.0f, // 2
-        -0.5f, 0.5f, 0.0f, 1.0f // 3
-    };
-    unsigned int indices[] = {
-        0, 1, 2, // 0
-        2, 3, 0 // 1
-    };
+    test::Test *currentTest = nullptr;
+    test::TestMenu *testMenu = new test::TestMenu(&currentTest);
+    currentTest = testMenu;
 
-    GLCall(glEnable(GL_BLEND));
-    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+    testMenu->RegisterTest<test::TestClearColor>("Clear Color");
 
-    VertexArray va;
-    VertexBuffer vb(positions, 4 * 4 * sizeof(float));
-
-    VertexBufferLayout layout;
-    layout.Push<float>(2);
-    layout.Push<float>(2);
-    va.AddBuffer(vb, layout);
-
-    IndexBuffer ib(indices, 6);
-
-    glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
-    glm::mat4 view = glm::mat4(1);
-
-    glm::vec3 translationA = glm::vec3(0.5f, 0, 0);
-    glm::vec3 translationB = glm::vec3(0, -0.2f, 0);
-
-    Shader shader("res/shaders/Basic.shader");
-    shader.Bind();
-
-    Texture texture("res/textures/sudou.jpg");
-    texture.Bind();
-    shader.SetUniform1i("u_Texture", 0);
-
-    va.Unbind();
-    vb.UnBind();
-    ib.UnBind();
-    shader.Unbind();
-    texture.UnBind();
-
-    Renderer renderer;
-
-    /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)) {
-        // ImGui new frame
+        GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+        renderer.Clear();
+
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ImGui::SliderFloat4("Rect A", &translationA[0], -1.0f, 1.0f);
-        ImGui::SliderFloat4("Rect B", &translationB[0], -1.0f, 1.0f);
 
-        /* Render here */
-        renderer.Clear();
-
-        shader.Bind();
-        texture.Bind();
-
-        { // Rect 1
-            glm::mat4 model = glm::translate(glm::mat4(1), translationA);
-            glm::mat4 mvp = proj * view * model;
-
-            shader.SetUniformMat4f("u_MVP", mvp);
-            renderer.Draw(va, ib, shader);
-        }
-
-        { // Rect 2
-            glm::mat4 model = glm::translate(glm::mat4(1), translationB);
-            glm::mat4 mvp = proj * view * model;
-
-            shader.SetUniformMat4f("u_MVP", mvp);
-            renderer.Draw(va, ib, shader);
+        if (currentTest) {
+            currentTest->OnUpdate(0.0f);
+            currentTest->OnRender();
+            ImGui::Begin("Test");
+            if (currentTest != testMenu && ImGui::Button("<-")) {
+                delete currentTest;
+                currentTest = testMenu;
+            }
+            currentTest->OnImGuiRender();
+            ImGui::End();
         }
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        /* Swap front and back buffers */
         glfwSwapBuffers(window);
-
-        /* Poll for and process events */
         glfwPollEvents();
     }
+
+    if (currentTest != testMenu) {
+        delete currentTest;
+    }
+    delete testMenu;
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
