@@ -1,6 +1,6 @@
 CC = clang++
 WARNINGS = -Wall -Wextra -Werror -Wpedantic -Wno-int-to-void-pointer-cast
-CFLAGS = -g -O2
+CFLAGS = -O2 -g
 LIBS = -lglfw -lGL -lGLEW
 
 # Base
@@ -8,7 +8,7 @@ FILES = main.cpp Renderer.cpp VertexBuffer.cpp IndexBuffer.cpp VertexArray.cpp S
 INCLUDE = -I.
 
 # Tests
-FILES += tests/TestClearColor.cpp tests/Test.cpp tests/TestTexture2D.cpp
+FILES += tests/TestClearColor.cpp tests/Test.cpp tests/TestTexture2D.cpp tests/TestCube.cpp
 INCLUDE += -Itests
 
 # STB 

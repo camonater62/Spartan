@@ -1,21 +1,30 @@
 #include "IndexBuffer.h"
 #include "Renderer.h"
 #include "Shader.h"
-#include "Test.h"
-#include "TestClearColor.h"
-#include "TestTexture2D.h"
 #include "Texture.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"
+
+// ImGui
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+// Tests
+#include "Test.h"
+#include "TestClearColor.h"
+#include "TestCube.h"
+#include "TestTexture2D.h"
+
+// OpenGL
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+// STD
+#include <chrono>
 #include <iostream>
 #include <string>
 
@@ -73,8 +82,19 @@ int main(void) {
 
     testMenu->RegisterTest<test::TestClearColor>("Clear Color");
     testMenu->RegisterTest<test::TestTexture2D>("2D Texture");
+    testMenu->RegisterTest<test::TestCube>("Cube");
+
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    auto lastUpdateTime = currentTime;
 
     while (!glfwWindowShouldClose(window)) {
+        currentTime = std::chrono::high_resolution_clock::now();
+        float deltaTime
+            = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastUpdateTime)
+                  .count()
+              / 1000.0f;
+        lastUpdateTime = currentTime;
+
         GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
         renderer.Clear();
 
@@ -83,7 +103,7 @@ int main(void) {
         ImGui::NewFrame();
 
         if (currentTest) {
-            currentTest->OnUpdate(0.0f);
+            currentTest->OnUpdate(deltaTime);
             currentTest->OnRender();
             ImGui::Begin("Test");
             if (currentTest != testMenu && ImGui::Button("<-")) {
