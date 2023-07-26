@@ -11,6 +11,7 @@ Shader::Shader(const std::string &filepath)
     : m_RendererId(0)
     , m_FilePath(filepath) {
     ShaderProgramSource source = ParseShader(filepath);
+    std::cout << "Compiling " << filepath << std::endl;
     m_RendererId = CreateShader(source.VertexSource, source.FragmentSource);
 }
 
@@ -67,17 +68,17 @@ ShaderProgramSource Shader::ParseShader(const std::string &filepath) {
 unsigned int Shader::CreateShader(
     const std::string &vertexShader, const std::string &fragmentShader) {
 
-    unsigned int program = glCreateProgram();
+    GLCall(unsigned int program = glCreateProgram());
     unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
     unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
 
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-    glLinkProgram(program);
-    glValidateProgram(program);
+    GLCall(glAttachShader(program, vs));
+    GLCall(glAttachShader(program, fs));
+    GLCall(glLinkProgram(program));
+    GLCall(glValidateProgram(program));
 
-    glDeleteShader(vs);
-    glDeleteShader(fs);
+    GLCall(glDeleteShader(vs));
+    GLCall(glDeleteShader(fs));
 
     return program;
 }

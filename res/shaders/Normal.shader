@@ -1,15 +1,16 @@
 #shader vertex
 #version 330 core
 
-layout(location = 0) in vec4 position;
-layout(location = 1) in vec4 normal;
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec3 normal;
+layout(location = 2) in vec2 texCoord;
 
-out vec4 v_Normal;
+out vec3 v_Normal;
 
 uniform mat4 u_MVP;
 
 void main() {
-    gl_Position = u_MVP * position;
+    gl_Position = u_MVP * vec4(position, 1.0);
     v_Normal = normal;
 }
 
@@ -18,7 +19,7 @@ void main() {
 
 layout(location = 0) out vec4 color;
 
-in vec4 v_Normal;
+in vec3 v_Normal;
 
 void main() {
     color.r = abs(v_Normal.r);

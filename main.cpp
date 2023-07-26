@@ -15,6 +15,7 @@
 #include "Test.h"
 #include "TestClearColor.h"
 #include "TestCube.h"
+#include "TestPhysX.h"
 #include "TestTexture2D.h"
 
 // OpenGL
@@ -51,7 +52,7 @@ int main(void) {
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
-    glfwSwapInterval(1); // V-Sync
+    glfwSwapInterval(0); // V-Sync
 
     if (glewInit() != GLEW_OK) {
         std::cerr << "Error!" << std::endl;
@@ -83,16 +84,16 @@ int main(void) {
     testMenu->RegisterTest<test::TestClearColor>("Clear Color");
     testMenu->RegisterTest<test::TestTexture2D>("2D Texture");
     testMenu->RegisterTest<test::TestCube>("Cube");
+    testMenu->RegisterTest<test::TestPhysX>("PhysX");
 
     auto currentTime = std::chrono::high_resolution_clock::now();
     auto lastUpdateTime = currentTime;
 
     while (!glfwWindowShouldClose(window)) {
         currentTime = std::chrono::high_resolution_clock::now();
-        float deltaTime
-            = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastUpdateTime)
-                  .count()
-              / 1000.0f;
+        float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(
+            currentTime - lastUpdateTime)
+                              .count();
         lastUpdateTime = currentTime;
 
         GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
