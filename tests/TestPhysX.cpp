@@ -12,8 +12,7 @@
 
 namespace test {
 
-TestPhysX::TestPhysX()
-    : m_RotationSpeed(1.0f) {
+TestPhysX::TestPhysX() {
     float vertices[] = {
         // Position (3) // Normal (3) // Tex coord (2)
         // Front
@@ -95,17 +94,28 @@ TestPhysX::TestPhysX()
     m_BlockShader->Unbind();
 
     // init physx
-    gFoundation
-        = PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, gDefaultErrorCallback);
-    if (!gFoundation)
+    m_Foundation = PxCreateFoundation(
+        PX_PHYSICS_VERSION, m_DefaultAllocatorCallback, m_DefaultErrorCallback);
+    if (!m_Foundation)
         throw("PxCreateFoundation failed!");
 
-#ifdef NDEBUG
-    gPvd = PxCreatePvd(*gFoundation);
-    transport = physx::PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
-    gPvd->connect(*transport, physx::PxPvdInstrumentationFlag::eALL);
+    m_TolerancesScale.length = 1;
+    m_TolerancesScale.speed = 9.81f;
 
-    physx::PxPvdSceneClient *pvdClient = gScene->getScenePvdClient();
+    m_Physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_Foundation, m_TolerancesScale, true, m_gPvd);
+    physx::PxSceneDesc sceneDesc(m_Physics->getTolerancesScale());
+    sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
+    m_Dispatcher = physx::PxDefaultCpuDispatcherCreate(4);
+    sceneDesc.cpuDispatcher = m_Dispatcher;
+    sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
+    m_Scene = m_Physics->createScene(sceneDesc);
+
+#ifdef _DEBUG
+    m_gPvd = PxCreatePvd(*m_Foundation);
+    m_Transport = physx::PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
+    m_gPvd->connect(*m_Transport, physx::PxPvdInstrumentationFlag::eALL);
+
+    physx::PxPvdSceneClient *pvdClient = m_Scene->getScenePvdClient();
     if (pvdClient) {
         pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
         pvdClient->setScenePvdFlag(physx::PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
@@ -113,21 +123,10 @@ TestPhysX::TestPhysX()
     }
 #endif
 
-    gTolerancesScale.length = 1;
-    gTolerancesScale.speed = 9.81f;
-
-    gPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *gFoundation, gTolerancesScale, true, gPvd);
-    physx::PxSceneDesc sceneDesc(gPhysics->getTolerancesScale());
-    sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
-    gDispatcher = physx::PxDefaultCpuDispatcherCreate(4);
-    sceneDesc.cpuDispatcher = gDispatcher;
-    sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
-    gScene = gPhysics->createScene(sceneDesc);
-
     // create simulation
-    gMaterial = gPhysics->createMaterial(0.5f, 0.5f, 0.6f);
-    groundPlane = PxCreatePlane(*gPhysics, physx::PxPlane(0, 1, 0, 1), *gMaterial);
-    gScene->addActor(*groundPlane);
+    m_Material = m_Physics->createMaterial(0.5f, 0.5f, 0.6f);
+    m_GroundPlane = PxCreatePlane(*m_Physics, physx::PxPlane(0, 1, 0, 1), *m_Material);
+    m_Scene->addActor(*m_GroundPlane);
 
     float halfExtent = 0.5f;
     physx::PxU32 size = 50;
@@ -136,19 +135,19 @@ TestPhysX::TestPhysX()
 }
 
 TestPhysX::~TestPhysX() {
-    transport->release();
-    gScene->release();
-    gDispatcher->release();
-    gPhysics->release();
-#ifdef NDEBUG
-    gPvd->release();
+    m_Transport->release();
+    m_Scene->release();
+    m_Dispatcher->release();
+    m_Physics->release();
+#ifdef _DEBUG
+    m_gPvd->release();
 #endif
-    gFoundation->release();
+    m_Foundation->release();
 }
 
 void TestPhysX::OnUpdate(float deltaTime) {
-    gScene->simulate(deltaTime);
-    gScene->fetchResults(true);
+    m_Scene->simulate(deltaTime);
+    m_Scene->fetchResults(true);
 }
 
 void TestPhysX::OnRender() {
@@ -158,8 +157,8 @@ void TestPhysX::OnRender() {
     Renderer renderer;
 
     { // Ground Plane
-        physx::PxVec3 position = groundPlane->getGlobalPose().p;
-        physx::PxQuat rotation = groundPlane->getGlobalPose().q;
+        physx::PxVec3 position = m_GroundPlane->getGlobalPose().p;
+        physx::PxQuat rotation = m_GroundPlane->getGlobalPose().q;
         glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(100.0f, 0.5f, 100.0f));
         model *= glm::translate(
             glm::mat4(1.0f), glm::vec3(position.x, position.y - 1.5f, position.z));
@@ -172,7 +171,7 @@ void TestPhysX::OnRender() {
 
     m_Texture->Bind();
 
-    for (const auto &box : boxes) {
+    for (const auto &box : m_Boxes) {
         physx::PxVec3 position = box->getGlobalPose().p;
         physx::PxQuat rotation = box->getGlobalPose().q;
         glm::mat4 model
@@ -187,25 +186,24 @@ void TestPhysX::OnRender() {
 }
 
 void TestPhysX::OnImGuiRender() {
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-        ImGui::GetIO().Framerate);
-    ImGui::SliderFloat("Rotation Speed", &m_RotationSpeed, 0.0f, 20.0f);
+    ImGui::Text(
+        "%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 }
 
 void TestPhysX::createStack(
     const physx::PxTransform &t, physx::PxU32 size, physx::PxReal halfExtent) {
-    physx::PxShape *shape = gPhysics->createShape(
-        physx::PxBoxGeometry(halfExtent, halfExtent, halfExtent), *gMaterial);
+    physx::PxShape *shape = m_Physics->createShape(
+        physx::PxBoxGeometry(halfExtent, halfExtent, halfExtent), *m_Material);
     for (physx::PxU32 i = 0; i < size; i++) {
         for (physx::PxU32 j = 0; j < size - i; j++) {
             physx::PxTransform localTm(physx::PxVec3(physx::PxReal(j * 2) - physx::PxReal(size - i),
                                            physx::PxReal(i * 2 + 1), 0)
                                        * halfExtent);
-            physx::PxRigidDynamic *body = gPhysics->createRigidDynamic(t.transform(localTm));
+            physx::PxRigidDynamic *body = m_Physics->createRigidDynamic(t.transform(localTm));
             body->attachShape(*shape);
             physx::PxRigidBodyExt::updateMassAndInertia(*body, 10.0f);
-            gScene->addActor(*body);
-            boxes.push_back(body);
+            m_Scene->addActor(*body);
+            m_Boxes.push_back(body);
         }
     }
     shape->release();

@@ -25,5 +25,7 @@ void main() {
     color.r = abs(v_Normal.r);
     color.g = abs(v_Normal.g);
     color.b = abs(v_Normal.b);
+    if (dot(v_Normal, vec3(1, 1, 1)) < 0.0)
+        color.rgb *= 0.8;
     color.a = 1.0;
 }

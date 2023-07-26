@@ -7,7 +7,7 @@
     if (!(x))                                                                                      \
         raise(SIGTRAP);
 
-#ifdef DEBUG
+#ifdef _DEBUG
 #define GLCall(x)                                                                                  \
     GLClearError();                                                                                \
     x;                                                                                             \

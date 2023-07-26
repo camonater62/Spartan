@@ -33,24 +33,22 @@ private:
     glm::mat4 m_Proj;
     glm::mat4 m_View;
 
-    float m_RotationSpeed;
+    physx::PxDefaultAllocator m_DefaultAllocatorCallback;
+    physx::PxDefaultErrorCallback m_DefaultErrorCallback;
+    physx::PxDefaultCpuDispatcher *m_Dispatcher;
+    physx::PxTolerancesScale m_TolerancesScale;
 
-    physx::PxDefaultAllocator gDefaultAllocatorCallback;
-    physx::PxDefaultErrorCallback gDefaultErrorCallback;
-    physx::PxDefaultCpuDispatcher *gDispatcher;
-    physx::PxTolerancesScale gTolerancesScale;
+    physx::PxPhysics *m_Physics;
+    physx::PxFoundation *m_Foundation;
 
-    physx::PxPhysics *gPhysics;
-    physx::PxFoundation *gFoundation;
+    physx::PxScene *m_Scene;
+    physx::PxMaterial *m_Material;
 
-    physx::PxScene *gScene;
-    physx::PxMaterial *gMaterial;
+    physx::PxPvd *m_gPvd;
+    physx::PxPvdTransport *m_Transport;
 
-    physx::PxPvd *gPvd;
-    physx::PxPvdTransport *transport;
-
-    physx::PxRigidStatic *groundPlane;
-    std::vector<physx::PxRigidDynamic *> boxes;
+    physx::PxRigidStatic *m_GroundPlane;
+    std::vector<physx::PxRigidDynamic *> m_Boxes;
 
     void createStack(const physx::PxTransform &t, physx::PxU32 size, physx::PxReal halfExtent);
 };

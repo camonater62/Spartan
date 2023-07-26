@@ -52,7 +52,7 @@ int main(void) {
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
-    glfwSwapInterval(0); // V-Sync
+    glfwSwapInterval(1); // V-Sync
 
     if (glewInit() != GLEW_OK) {
         std::cerr << "Error!" << std::endl;

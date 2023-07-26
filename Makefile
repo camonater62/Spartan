@@ -5,7 +5,7 @@ CFLAGS = -O2 -g
 FILES = main.cpp Renderer.cpp VertexBuffer.cpp IndexBuffer.cpp VertexArray.cpp Shader.cpp Texture.cpp
 INCLUDE = -I.
 LIBS = -lglfw -lGL -lGLEW
-DEFINE = -DDEBUG -DGLEW_STATIC 
+DEFINE = -D_DEBUG -DGLEW_STATIC 
 
 # Tests
 FILES += tests/TestClearColor.cpp tests/Test.cpp tests/TestTexture2D.cpp tests/TestCube.cpp tests/TestPhysX.cpp
@@ -29,7 +29,7 @@ LIBS += -lPhysXCharacterKinematic_static_64 -lPhysXCooking_static_64 -lPhysXVehi
 LIBS += -lPhysXVehicle2_static_64 -lPVDRuntime_64 -lPhysXGpu_64
 LIBS += -lPhysXPvdSDK_static_64 -lPhysXExtensions_static_64
 INCLUDE += -Ivendor/physx/include
-DEFINE += -DNDEBUG -DPX_CHECKED=1 -DPX_NVTX=0 -DPX_PUBLIC_RELEASE=1 -DPX_SUPPORT_OMNI_PVD=1 -DPX_SUPPORT_PVD=1
+DEFINE += -DPX_CHECKED=1 -DPX_NVTX=0 -DPX_PUBLIC_RELEASE=1 -DPX_SUPPORT_OMNI_PVD=1 -DPX_SUPPORT_PVD=1
 
 OBJ_DIR = obj
 OBJECTS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(FILES))
