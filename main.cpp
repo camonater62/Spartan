@@ -13,8 +13,10 @@
 
 // Tests
 #include "Test.h"
+#include "TestAssimp.h"
 #include "TestClearColor.h"
 #include "TestCube.h"
+#include "TestDirectionalLight.h"
 #include "TestPhysX.h"
 #include "TestTexture2D.h"
 
@@ -84,7 +86,9 @@ int main(void) {
     testMenu->RegisterTest<test::TestClearColor>("Clear Color");
     testMenu->RegisterTest<test::TestTexture2D>("2D Texture");
     testMenu->RegisterTest<test::TestCube>("Cube");
+    // testMenu->RegisterTest<test::TestDirectionalLight>("Directional Light");
     testMenu->RegisterTest<test::TestPhysX>("PhysX");
+    testMenu->RegisterTest<test::TestAssimp>("Assimp");
 
     auto currentTime = std::chrono::high_resolution_clock::now();
     auto lastUpdateTime = currentTime;

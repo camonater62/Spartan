@@ -69,7 +69,7 @@ TestPhysX::TestPhysX() {
 
     m_VAO = std::make_unique<VertexArray>();
     // 6 faces of 4 vertices of 8 floats
-    m_VBO = std::make_unique<VertexBuffer>(vertices, 6 * 4 * 8 * sizeof(float));
+    m_VBO = std::make_unique<VertexBuffer>(vertices, sizeof(vertices));
     VertexBufferLayout layout = VertexBufferLayout();
     layout.Push<float>(3); // position
     layout.Push<float>(3); // normal
@@ -77,7 +77,7 @@ TestPhysX::TestPhysX() {
     m_VAO->AddBuffer(*m_VBO, layout);
     m_IBO = std::make_unique<IndexBuffer>(indices, 36);
 
-    m_Proj = glm::perspective(glm::radians(45.f), 960.f / 540.f, 0.1f, 100.f);
+    m_Proj = glm::perspective(glm::radians(45.f), 960.f / 540.f, 0.1f, 1000.f);
     m_View = glm::translate(glm::mat4(1.0f), glm::vec3(0, -4, -50));
 
     m_GroundShader = std::make_unique<Shader>("res/shaders/Normal.shader");
@@ -102,7 +102,7 @@ TestPhysX::TestPhysX() {
     m_TolerancesScale.length = 1;
     m_TolerancesScale.speed = 9.81f;
 
-    m_Physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_Foundation, m_TolerancesScale, true, m_gPvd);
+    m_Physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_Foundation, m_TolerancesScale, true, m_Pvd);
     physx::PxSceneDesc sceneDesc(m_Physics->getTolerancesScale());
     sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
     m_Dispatcher = physx::PxDefaultCpuDispatcherCreate(4);
@@ -111,9 +111,9 @@ TestPhysX::TestPhysX() {
     m_Scene = m_Physics->createScene(sceneDesc);
 
 #ifdef _DEBUG
-    m_gPvd = PxCreatePvd(*m_Foundation);
+    m_Pvd = PxCreatePvd(*m_Foundation);
     m_Transport = physx::PxDefaultPvdSocketTransportCreate("127.0.0.1", 5425, 10);
-    m_gPvd->connect(*m_Transport, physx::PxPvdInstrumentationFlag::eALL);
+    m_Pvd->connect(*m_Transport, physx::PxPvdInstrumentationFlag::eALL);
 
     physx::PxPvdSceneClient *pvdClient = m_Scene->getScenePvdClient();
     if (pvdClient) {
@@ -129,18 +129,18 @@ TestPhysX::TestPhysX() {
     m_Scene->addActor(*m_GroundPlane);
 
     float halfExtent = 0.5f;
-    physx::PxU32 size = 50;
+    physx::PxU32 size = 100;
     const physx::PxTransform t(physx::PxVec3(0, 100, 0));
     createStack(t, size, halfExtent);
 }
 
 TestPhysX::~TestPhysX() {
-    m_Transport->release();
     m_Scene->release();
     m_Dispatcher->release();
     m_Physics->release();
 #ifdef _DEBUG
-    m_gPvd->release();
+    m_Transport->release();
+    m_Pvd->release();
 #endif
     m_Foundation->release();
 }

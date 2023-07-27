@@ -1,4 +1,4 @@
-#include "TestCube.h"
+#include "TestDirectionalLight.h"
 
 #include "Macros.h"
 #include "Renderer.h"
@@ -9,7 +9,7 @@
 
 namespace test {
 
-TestCube::TestCube()
+TestDirectionalLight::TestDirectionalLight()
     : m_RotationSpeed(1.0f) {
 
     float vertices[] = {
@@ -45,6 +45,7 @@ TestCube::TestCube()
         0.5f, -0.5f, 0.5f, 0.f, -1.0f, 0.f, 1.0f, 1.0f, // 22
         0.5f, -0.5f, -0.5f, 0.f, -1.0f, 0.f, 0.0f, 1.0f, // 23
     };
+
     unsigned int indices[] = {
         // Front
         0, 1, 2, // 0
@@ -89,16 +90,16 @@ TestCube::TestCube()
     m_Shader->Unbind();
 }
 
-TestCube::~TestCube() {
+TestDirectionalLight::~TestDirectionalLight() {
 }
 
-void TestCube::OnUpdate(float deltaTime) {
+void TestDirectionalLight::OnUpdate(float deltaTime) {
     glm::vec3 axis = glm::normalize(glm::vec3(1.0f, 0.5f, 0.0f));
     float angle = m_RotationSpeed * deltaTime * glm::radians(45.f);
     m_Model = glm::rotate(m_Model, angle, axis);
 }
 
-void TestCube::OnRender() {
+void TestDirectionalLight::OnRender() {
     GLCall(glEnable(GL_DEPTH_TEST));
     GLCall(glDisable(GL_CULL_FACE));
 
@@ -110,7 +111,7 @@ void TestCube::OnRender() {
     renderer.Draw(*m_VAO, *m_IBO, *m_Shader);
 }
 
-void TestCube::OnImGuiRender() {
+void TestDirectionalLight::OnImGuiRender() {
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
         ImGui::GetIO().Framerate);
     ImGui::SliderFloat("Rotation Speed", &m_RotationSpeed, 0.0f, 20.0f);

@@ -8,7 +8,7 @@ LIBS = -lglfw -lGL -lGLEW
 DEFINE = -D_DEBUG -DGLEW_STATIC 
 
 # Tests
-FILES += tests/TestClearColor.cpp tests/Test.cpp tests/TestTexture2D.cpp tests/TestCube.cpp tests/TestPhysX.cpp
+FILES += tests/TestClearColor.cpp tests/Test.cpp tests/TestTexture2D.cpp tests/TestCube.cpp tests/TestPhysX.cpp tests/TestDirectionalLight.cpp tests/TestAssimp.cpp
 INCLUDE += -Itests
 
 ## Vendor
@@ -31,10 +31,12 @@ LIBS += -lPhysXPvdSDK_static_64 -lPhysXExtensions_static_64
 INCLUDE += -Ivendor/physx/include
 DEFINE += -DPX_CHECKED=1 -DPX_NVTX=0 -DPX_PUBLIC_RELEASE=1 -DPX_SUPPORT_OMNI_PVD=1 -DPX_SUPPORT_PVD=1
 
+# Assimp
+LIBS += -lassimp
+
 OBJ_DIR = obj
 OBJECTS = $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(FILES))
 OUT_EXE = out.run
-
 
 default: $(OUT_EXE)
 

@@ -44,7 +44,7 @@ private:
     physx::PxScene *m_Scene;
     physx::PxMaterial *m_Material;
 
-    physx::PxPvd *m_gPvd;
+    physx::PxPvd *m_Pvd = nullptr;
     physx::PxPvdTransport *m_Transport;
 
     physx::PxRigidStatic *m_GroundPlane;
