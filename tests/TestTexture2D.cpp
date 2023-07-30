@@ -39,7 +39,7 @@ TestTexture2D::TestTexture2D()
 
     m_Proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
     m_View = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
-    m_Shader = std::make_unique<Shader>("res/shaders/Basic.shader");
+    m_Shader = std::make_unique<Shader>("res/shaders/BasicTexture.shader");
     m_Shader->Bind();
     m_Texture = std::make_unique<Texture>("res/textures/sudou.jpg");
 

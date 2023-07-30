@@ -12,6 +12,7 @@ private:
 
 public:
     Texture(const std::string &path);
+    Texture(unsigned char *data, unsigned int size);
     ~Texture();
 
     void Bind(unsigned int slot = 0) const;
