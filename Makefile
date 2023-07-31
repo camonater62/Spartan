@@ -1,7 +1,7 @@
 # Base
 CC = clang++
 WARNINGS = -Wall -Wextra -Werror -Wpedantic -Wno-int-to-void-pointer-cast
-CFLAGS = -O2 -g -std=c++17
+CFLAGS = -O2 -g -std=c++17 -march=x86-64-v2 -mtune=generic -pipe
 FILES = main.cpp Renderer.cpp VertexBuffer.cpp IndexBuffer.cpp VertexArray.cpp Shader.cpp Texture.cpp
 INCLUDE = -I.
 LIBS = -lglfw -lGL -lGLEW

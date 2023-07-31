@@ -9,6 +9,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <imgui.h>
 #include <iostream>
+#include <thread>
 
 namespace test {
 
@@ -105,7 +106,9 @@ TestPhysX::TestPhysX() {
     m_Physics = PxCreatePhysics(PX_PHYSICS_VERSION, *m_Foundation, m_TolerancesScale, true, m_Pvd);
     physx::PxSceneDesc sceneDesc(m_Physics->getTolerancesScale());
     sceneDesc.gravity = physx::PxVec3(0.0f, -9.81f, 0.0f);
-    m_Dispatcher = physx::PxDefaultCpuDispatcherCreate(4);
+    unsigned int numWorkers = std::max(1u, std::thread::hardware_concurrency() / 2);
+    std::cout << "Using " << numWorkers << " PhysX workers" << std::endl;
+    m_Dispatcher = physx::PxDefaultCpuDispatcherCreate(numWorkers);
     sceneDesc.cpuDispatcher = m_Dispatcher;
     sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
     m_Scene = m_Physics->createScene(sceneDesc);
@@ -129,8 +132,8 @@ TestPhysX::TestPhysX() {
     m_Scene->addActor(*m_GroundPlane);
 
     float halfExtent = 0.5f;
-    physx::PxU32 size = 100;
-    const physx::PxTransform t(physx::PxVec3(0, 100, 0));
+    physx::PxU32 size = 50;
+    const physx::PxTransform t(physx::PxVec3(0, 10, 0));
     createStack(t, size, halfExtent);
 }
 
@@ -201,7 +204,7 @@ void TestPhysX::createStack(
                                        * halfExtent);
             physx::PxRigidDynamic *body = m_Physics->createRigidDynamic(t.transform(localTm));
             body->attachShape(*shape);
-            physx::PxRigidBodyExt::updateMassAndInertia(*body, 10.0f);
+            physx::PxRigidBodyExt::updateMassAndInertia(*body, 10000.0f);
             m_Scene->addActor(*body);
             m_Boxes.push_back(body);
         }

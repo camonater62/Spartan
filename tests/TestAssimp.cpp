@@ -94,24 +94,31 @@ TestAssimp::TestAssimp()
         aiMaterial *material = m_Scene->mMaterials[mesh->mMaterialIndex];
         aiString path;
         material->GetTexture(aiTextureType_DIFFUSE, 0, &path);
-        std::cout << "Texture: " << path.C_Str() << std::endl;
-        const aiTexture *texture = m_Scene->GetEmbeddedTexture(path.C_Str());
+        const aiTexture *diffuseTexture = m_Scene->GetEmbeddedTexture(path.C_Str());
+        // std::cout << "Diffuse Texture: " << path.C_Str() << std::endl;
+        material->GetTexture(aiTextureType_SPECULAR, 0, &path);
+        const aiTexture *specularTexture = m_Scene->GetEmbeddedTexture(path.C_Str());
+        // std::cout << "Specular Texture: " << path.C_Str() << std::endl;
 
-        if (texture && texture->mHeight == 0) {
-            m.Texture
-                = std::make_unique<Texture>((unsigned char *) texture->pcData, texture->mWidth);
-            std::cout << "Texture width: " << m.Texture->GetWidth() << std::endl;
-            std::cout << "Texture height: " << m.Texture->GetHeight() << std::endl;
-        } else {
-            std::cout << "TODO!!" << std::endl;
-            // m.Texture = std::make_unique<Texture>(texture->pcData, texture->mWidth, texture->mHeight);
+        for (const auto &texture : { specularTexture, diffuseTexture }) {
+            if (texture) {
+                if (texture->mHeight == 0) {
+                    m.Texture = std::make_unique<Texture>(
+                        (unsigned char *) texture->pcData, texture->mWidth);
+                    // std::cout << "Texture width: " << m.Texture->GetWidth() << std::endl;
+                    // std::cout << "Texture height: " << m.Texture->GetHeight() << std::endl;
+                } else {
+                    std::cout << "TODO!!" << std::endl;
+                    // m.Texture = std::make_unique<Texture>(texture->pcData, texture->mWidth, texture->mHeight);
+                }
+            }
         }
 
         m_Meshes.push_back(m);
     }
 
     m_Proj = glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.1f, 100.f);
-    m_View = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.f, -10.0f));
+    m_View = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, -10.0f));
 }
 
 TestAssimp::~TestAssimp() {
@@ -120,7 +127,7 @@ TestAssimp::~TestAssimp() {
 void TestAssimp::OnUpdate(float deltaTime) {
     (void) deltaTime;
     (void) m_RotationSpeed;
-    glm::vec3 axis = glm::normalize(glm::vec3(1.0f, 0.5f, 0.0f));
+    glm::vec3 axis = glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f));
     float angle = m_RotationSpeed * deltaTime * glm::radians(45.f);
     for (auto &mesh : m_Meshes) {
         mesh.Model = glm::rotate(mesh.Model, angle, axis);
@@ -130,6 +137,8 @@ void TestAssimp::OnUpdate(float deltaTime) {
 void TestAssimp::OnRender() {
     GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
+    GLCall(glEnable(GL_CULL_FACE));
+    GLCall(glCullFace(GL_BACK));
     GLCall(glEnable(GL_DEPTH_TEST));
 
     Renderer renderer;
@@ -139,8 +148,9 @@ void TestAssimp::OnRender() {
         glm::mat4 mvp = m_Proj * m_View * mesh.Model;
         mesh.Shader->Bind();
         mesh.Shader->SetUniformMat4f("u_MVP", mvp);
-        if (mesh.Texture)
+        if (mesh.Texture) {
             mesh.Texture->Bind();
+        }
         renderer.Draw(*mesh.VAO, *mesh.IBO, *mesh.Shader);
     }
 }
@@ -148,6 +158,8 @@ void TestAssimp::OnRender() {
 void TestAssimp::OnImGuiRender() {
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
         ImGui::GetIO().Framerate);
+    ImGui::SliderFloat("Rotation Speed", &m_RotationSpeed, 0.0f, 20.0f);
+    ImGui::Separator();
     ImGui::Text("Meshes: %d", m_Scene->mNumMeshes);
     ImGui::Separator();
     for (unsigned int i = 0; i < m_Scene->mNumMeshes; i++) {
@@ -155,14 +167,14 @@ void TestAssimp::OnImGuiRender() {
         ImGui::Text("m_Vertices: %d", m_Scene->mMeshes[i]->mNumVertices);
         ImGui::Text("Faces: %d", m_Scene->mMeshes[i]->mNumFaces);
         ImGui::Text("Material Index: %d", m_Scene->mMeshes[i]->mMaterialIndex);
-        // ImGui::Text("Bones: %d", m_Scene->mMeshes[i]->mNumBones);
-        // ImGui::Text("Has Normals: %s", m_Scene->mMeshes[i]->HasNormals() ? "true" : "false");
-        // ImGui::Text("Has Tangents and Bitangents: %s",
-        //     m_Scene->mMeshes[i]->HasTangentsAndBitangents() ? "true" : "false");
-        // ImGui::Text("Has Texture Coordinates: %s",
-        //     m_Scene->mMeshes[i]->HasTextureCoords(0) ? "true" : "false");
-        // ImGui::Text(
-        //     "Has Vertex Colors: %s", m_Scene->mMeshes[i]->HasVertexColors(0) ? "true" : "false");
+        ImGui::Text("Bones: %d", m_Scene->mMeshes[i]->mNumBones);
+        ImGui::Text("Has Normals: %s", m_Scene->mMeshes[i]->HasNormals() ? "true" : "false");
+        ImGui::Text("Has Tangents and Bitangents: %s",
+            m_Scene->mMeshes[i]->HasTangentsAndBitangents() ? "true" : "false");
+        ImGui::Text("Has Texture Coordinates: %s",
+            m_Scene->mMeshes[i]->HasTextureCoords(0) ? "true" : "false");
+        ImGui::Text(
+            "Has Vertex Colors: %s", m_Scene->mMeshes[i]->HasVertexColors(0) ? "true" : "false");
 
         ImGui::Separator();
     }
@@ -171,14 +183,14 @@ void TestAssimp::OnImGuiRender() {
     ImGui::Separator();
     for (unsigned int i = 0; i < m_Scene->mNumMaterials; i++) {
         ImGui::Text("Name: %s", m_Scene->mMaterials[i]->GetName().C_Str());
-        // for (unsigned int j = 0; j < m_Scene->mMaterials[i]->mNumProperties; j++) {
-        //     ImGui::Text("Property Name: %s", m_Scene->mMaterials[i]->mProperties[j]->mKey.C_Str());
-        //     ImGui::Text("Property Type: %d", m_Scene->mMaterials[i]->mProperties[j]->mType);
-        //     ImGui::Text("Property Index: %d", m_Scene->mMaterials[i]->mProperties[j]->mIndex);
-        //     ImGui::Text(
-        //         "Property Data Length: %d", m_Scene->mMaterials[i]->mProperties[j]->mDataLength);
-        //     ImGui::Separator();
-        // }
+        for (unsigned int j = 0; j < m_Scene->mMaterials[i]->mNumProperties; j++) {
+            ImGui::Text("Property Name: %s", m_Scene->mMaterials[i]->mProperties[j]->mKey.C_Str());
+            ImGui::Text("Property Type: %d", m_Scene->mMaterials[i]->mProperties[j]->mType);
+            ImGui::Text("Property Index: %d", m_Scene->mMaterials[i]->mProperties[j]->mIndex);
+            ImGui::Text(
+                "Property Data Length: %d", m_Scene->mMaterials[i]->mProperties[j]->mDataLength);
+            ImGui::Separator();
+        }
         ImGui::Separator();
     }
 

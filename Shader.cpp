@@ -7,16 +7,35 @@
 #include <iostream>
 #include <sstream>
 
+std::unordered_map<std::string, std::pair<unsigned int, unsigned int>> Shader::s_ShaderMap;
+
 Shader::Shader(const std::string &filepath)
     : m_RendererId(0)
     , m_FilePath(filepath) {
+
+    if (s_ShaderMap.find(filepath) != s_ShaderMap.end()) {
+        m_RendererId = s_ShaderMap[filepath].first;
+        s_ShaderMap[filepath].second++;
+        return;
+    }
+
     ShaderProgramSource source = ParseShader(filepath);
     std::cout << "Compiling " << filepath << std::endl;
     m_RendererId = CreateShader(source.VertexSource, source.FragmentSource);
+
+    s_ShaderMap[filepath] = std::make_pair(m_RendererId, 1);
 }
 
 Shader::~Shader() {
-    GLCall(glDeleteProgram(m_RendererId));
+    if (s_ShaderMap.find(m_FilePath) != s_ShaderMap.end()) {
+        s_ShaderMap[m_FilePath].second--;
+        if (s_ShaderMap[m_FilePath].second == 0) {
+            s_ShaderMap.erase(m_FilePath);
+            GLCall(glDeleteProgram(m_RendererId));
+        }
+    } else {
+        std::cout << "Shader not found in map during destruction" << std::endl;
+    }
 }
 
 unsigned int Shader::CompileShader(unsigned int type, const std::string &source) {
@@ -57,7 +76,7 @@ ShaderProgramSource Shader::ParseShader(const std::string &filepath) {
             } else if (line.find("fragment") != std::string::npos) {
                 type = ShaderType::FRAGMENT;
             }
-        } else {
+        } else if (type != ShaderType::NONE) {
             ss[(int) type] << line << '\n';
         }
     }

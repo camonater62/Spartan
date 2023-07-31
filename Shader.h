@@ -14,6 +14,8 @@ private:
     unsigned int m_RendererId;
     std::string m_FilePath;
     mutable std::unordered_map<std::string, int> m_UniformLocationCache;
+    // string: filepath, pair: rendererId, reference count
+    static std::unordered_map<std::string, std::pair<unsigned int, unsigned int>> s_ShaderMap;
 
 public:
     Shader(const std::string &filepath);
