@@ -84,10 +84,10 @@ TestDirectionalLight::TestDirectionalLight()
     m_Shader = std::make_unique<Shader>("res/shaders/Normal.shader");
     m_Shader->Bind();
 
-    m_VAO->Unbind();
+    m_VAO->UnBind();
     m_VBO->UnBind();
     m_IBO->UnBind();
-    m_Shader->Unbind();
+    m_Shader->UnBind();
 }
 
 TestDirectionalLight::~TestDirectionalLight() {

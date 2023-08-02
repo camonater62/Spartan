@@ -1,4 +1,4 @@
-#include "TestPhysX.h"
+#include "TestVehicle.h"
 
 #include "Macros.h"
 #include "Renderer.h"
@@ -13,7 +13,7 @@
 
 namespace test {
 
-TestPhysX::TestPhysX() {
+TestVehicle::TestVehicle() {
     float vertices[] = {
         // Position (3) // Normal (3) // Tex coord (2)
         // Front
@@ -135,9 +135,45 @@ TestPhysX::TestPhysX() {
     physx::PxU32 size = 50;
     const physx::PxTransform t(physx::PxVec3(0, 10, 0));
     createStack(t, size, halfExtent);
+
+    // {
+    //     using namespace physx::vehicle2;
+    //     PxInitVehicleExtension(*m_Foundation);
+
+    //     PxVehicleFrame vehicleFrame;
+    //     PxVehicleRigidBodyParams physxActorRigidBodyParams;
+    //     /*
+    //     const PxVehicleRigidBodyParams& _physxActorRigidBodyParams,
+    //     const char* _physxActorName
+    //     */
+    //     PxVehiclePhysXRigidActorParams rigidActorParams(physxActorRigidBodyParams, "TestVehicle");
+    //     physx::PxTransform rigidActorCmassLocalPose(physx::PxVec3(0, 0, 0));
+    //     /*
+    //     const physx::PxGeometry &_geometry,
+    //     const physx::PxTransform &_localPose,
+    //     const physx::PxMaterial &_material,
+    //     const physx::PxShapeFlags _flags,
+    //     const physx::PxFilterData &_simulationFilterData,
+    //     const physx::PxFilterData &_queryFilterData
+    //     */
+    //     PxVehiclePhysXRigidActorShapeParams rigidActorShapeParams();
+    //     PxVehiclePhysXActor *vehiclePhysXActor = nullptr;
+    //     /*
+    //     const physx::vehicle2::PxVehicleFrame &vehicleFrame,
+    //     const physx::vehicle2::PxVehiclePhysXRigidActorParams &rigidActorParams,
+    //     const physx::PxTransform &rigidActorCmassLocalPose,
+    //     const physx::vehicle2::PxVehiclePhysXRigidActorShapeParams &rigidActorShapeParams,
+    //     const physx::vehicle2::PxVehiclePhysXWheelParams &wheelParams,
+    //     const physx::vehicle2::PxVehiclePhysXWheelShapeParams &wheelShapeParams,
+    //     physx::PxPhysics &physics,
+    //     const physx::PxCookingParams &params,
+    //     physx::vehicle2::PxVehiclePhysXActor &vehiclePhysXActor)
+    //     */
+    //     PxVehiclePhysXActorCreate()
+    // }
 }
 
-TestPhysX::~TestPhysX() {
+TestVehicle::~TestVehicle() {
     m_Scene->release();
     m_Dispatcher->release();
     m_Physics->release();
@@ -148,12 +184,12 @@ TestPhysX::~TestPhysX() {
     m_Foundation->release();
 }
 
-void TestPhysX::OnUpdate(float deltaTime) {
+void TestVehicle::OnUpdate(float deltaTime) {
     m_Scene->simulate(deltaTime);
     m_Scene->fetchResults(true);
 }
 
-void TestPhysX::OnRender() {
+void TestVehicle::OnRender() {
     GLCall(glEnable(GL_DEPTH_TEST));
     GLCall(glDisable(GL_CULL_FACE));
 
@@ -188,12 +224,12 @@ void TestPhysX::OnRender() {
     }
 }
 
-void TestPhysX::OnImGuiRender() {
+void TestVehicle::OnImGuiRender() {
     ImGui::Text(
         "%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 }
 
-void TestPhysX::createStack(
+void TestVehicle::createStack(
     const physx::PxTransform &t, physx::PxU32 size, physx::PxReal halfExtent) {
     physx::PxShape *shape = m_Physics->createShape(
         physx::PxBoxGeometry(halfExtent, halfExtent, halfExtent), *m_Material);

@@ -85,10 +85,10 @@ TestAssimp::TestAssimp()
         m.Shader = std::make_unique<Shader>("res/shaders/BasicTexture.shader");
         m.Shader->Bind();
 
-        m.VAO->Unbind();
+        m.VAO->UnBind();
         m.VBO->UnBind();
         m.IBO->UnBind();
-        m.Shader->Unbind();
+        m.Shader->UnBind();
 
         m.MaterialIndex = mesh->mMaterialIndex;
         aiMaterial *material = m_Scene->mMaterials[mesh->mMaterialIndex];

@@ -2,13 +2,16 @@
 CC = clang++
 WARNINGS = -Wall -Wextra -Werror -Wpedantic -Wno-int-to-void-pointer-cast
 CFLAGS = -O2 -g -std=c++17 -march=x86-64-v2 -mtune=generic -pipe
-FILES = main.cpp Renderer.cpp VertexBuffer.cpp IndexBuffer.cpp VertexArray.cpp Shader.cpp Texture.cpp
+FILES = main.cpp Renderer.cpp VertexBuffer.cpp IndexBuffer.cpp VertexArray.cpp 
+FILES += Shader.cpp Texture.cpp Camera.cpp Plane.cpp
 INCLUDE = -I.
 LIBS = -lglfw -lGL -lGLEW
 DEFINE = -D_DEBUG -DGLEW_STATIC 
 
 # Tests
-FILES += tests/TestClearColor.cpp tests/Test.cpp tests/TestTexture2D.cpp tests/TestCube.cpp tests/TestPhysX.cpp tests/TestDirectionalLight.cpp tests/TestAssimp.cpp
+FILES += tests/TestClearColor.cpp tests/Test.cpp tests/TestTexture2D.cpp 
+FILES += tests/TestCube.cpp tests/TestPhysX.cpp tests/TestDirectionalLight.cpp 
+FILES += tests/TestAssimp.cpp tests/TestVehicle.cpp tests/TestNoise.cpp
 INCLUDE += -Itests
 
 ## Vendor
@@ -17,7 +20,10 @@ FILES += vendor/stb_image/stb_image.cpp
 INCLUDE += -Ivendor/stb_image
 
 # Dear ImGui
-FILES += vendor/imgui/imgui_draw.cpp vendor/imgui/imgui_demo.cpp vendor/imgui/imgui_tables.cpp vendor/imgui/imgui_widgets.cpp vendor/imgui/imgui.cpp vendor/imgui/backends/imgui_impl_glfw.cpp vendor/imgui/backends/imgui_impl_opengl3.cpp
+FILES += vendor/imgui/imgui_draw.cpp vendor/imgui/imgui_demo.cpp 
+FILES += vendor/imgui/imgui_tables.cpp vendor/imgui/imgui_widgets.cpp 
+FILES += vendor/imgui/imgui.cpp vendor/imgui/backends/imgui_impl_glfw.cpp 
+FILES += vendor/imgui/backends/imgui_impl_opengl3.cpp
 INCLUDE += -Ivendor/imgui -Ivendor/imgui/backends
 
 # PhysX

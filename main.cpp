@@ -17,8 +17,10 @@
 #include "TestClearColor.h"
 #include "TestCube.h"
 #include "TestDirectionalLight.h"
+#include "TestNoise.h"
 #include "TestPhysX.h"
 #include "TestTexture2D.h"
+#include "TestVehicle.h"
 
 // OpenGL
 #include <GL/glew.h>
@@ -89,6 +91,8 @@ int main(void) {
     // testMenu->RegisterTest<test::TestDirectionalLight>("Directional Light");
     testMenu->RegisterTest<test::TestPhysX>("PhysX");
     testMenu->RegisterTest<test::TestAssimp>("Assimp");
+    testMenu->RegisterTest<test::TestVehicle>("Vehicle");
+    testMenu->RegisterTest<test::TestNoise>("Noise");
 
     auto currentTime = std::chrono::high_resolution_clock::now();
     auto lastUpdateTime = currentTime;

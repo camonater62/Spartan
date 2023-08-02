@@ -105,7 +105,7 @@ unsigned int Shader::CreateShader(
 void Shader::Bind() const {
     GLCall(glUseProgram(m_RendererId));
 }
-void Shader::Unbind() const {
+void Shader::UnBind() const {
     GLCall(glUseProgram(0));
 }
 

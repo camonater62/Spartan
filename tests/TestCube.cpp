@@ -76,17 +76,18 @@ TestCube::TestCube()
     m_VAO->AddBuffer(*m_VBO, layout);
     m_IBO = std::make_unique<IndexBuffer>(indices, 36);
 
-    m_Proj = glm::perspective(glm::radians(45.f), 960.f / 540.f, 0.1f, 100.f);
-    m_View = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -4));
+    m_CameraPosition = glm::vec3(0, 0, 4);
+    m_Camera.SetProjectionMatrix(glm::perspective(glm::radians(45.f), 16.f / 9.f, 0.1f, 100.f));
+    m_Camera.SetLookAt(m_CameraPosition, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
     m_Model = glm::mat4(1.0f);
 
     m_Shader = std::make_unique<Shader>("res/shaders/Normal.shader");
     m_Shader->Bind();
 
-    m_VAO->Unbind();
+    m_VAO->UnBind();
     m_VBO->UnBind();
     m_IBO->UnBind();
-    m_Shader->Unbind();
+    m_Shader->UnBind();
 }
 
 TestCube::~TestCube() {
@@ -96,6 +97,8 @@ void TestCube::OnUpdate(float deltaTime) {
     glm::vec3 axis = glm::normalize(glm::vec3(1.0f, 0.5f, 0.0f));
     float angle = m_RotationSpeed * deltaTime * glm::radians(45.f);
     m_Model = glm::rotate(m_Model, angle, axis);
+    m_Camera.SetLookAt(
+        m_CameraPosition, m_CameraPosition + glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
 }
 
 void TestCube::OnRender() {
@@ -104,7 +107,7 @@ void TestCube::OnRender() {
 
     Renderer renderer;
 
-    glm::mat4 mvp = m_Proj * m_View * m_Model;
+    glm::mat4 mvp = m_Camera.GetViewProjectionMatrix() * m_Model;
     m_Shader->Bind();
     m_Shader->SetUniformMat4f("u_MVP", mvp);
     renderer.Draw(*m_VAO, *m_IBO, *m_Shader);
@@ -114,6 +117,7 @@ void TestCube::OnImGuiRender() {
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
         ImGui::GetIO().Framerate);
     ImGui::SliderFloat("Rotation Speed", &m_RotationSpeed, 0.0f, 20.0f);
+    ImGui::SliderFloat3("Camera Position", &m_CameraPosition.x, -10.0f, 10.0f);
 }
 
 }
